@@ -1,1 +1,410 @@
-# huy-card
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bất ngờ 20/10 nè — Beige & Teal</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Pacifico&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f7efe6;        /* soft beige background */
+      --teal:#138496;      /* main teal accent */
+      --beige:#d9c8b1;     /* secondary beige */
+      --muted:#7a6e62;
+      --paper:#fffdf9;
+      --text:#263238;
+      --soft-shadow: 0 14px 36px rgba(19,132,150,0.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:linear-gradient(180deg,var(--bg),#fff);color:var(--text)}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+    .card{
+      width:100%;
+      max-width:980px;
+      height:88vh;
+      background:var(--paper);
+      border-radius:16px;
+      box-shadow:var(--soft-shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      border:1px solid rgba(10,10,10,0.03);
+    }
+    .stage{flex:1;display:flex;align-items:center;justify-content:center;position:relative;padding:18px;cursor:pointer}
+    .stage-screen{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:8px}
+    .hidden{display:none}
+    .hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.95);padding:10px 14px;border-radius:999px;font-size:14px;color:var(--muted);box-shadow:0 8px 18px rgba(0,0,0,0.06)}
+    .controls{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid rgba(0,0,0,0.04);background:linear-gradient(180deg,rgba(255,255,255,0.6),transparent)}
+    .left-controls{display:flex;gap:10px;align-items:center}
+    .btn{border:0;padding:10px 14px;border-radius:10px;background:var(--teal);color:white;font-weight:700;cursor:pointer}
+    .btn.ter{background:#f3f3f3;color:var(--muted);box-shadow:none}
+    .small{font-size:13px;color:var(--muted)}
+    .title{font-size:22px;color:var(--teal);font-weight:800;margin-bottom:10px}
+
+    /* Visual containers */
+    .big-visual{max-width:860px;width:94%;border-radius:14px;background:linear-gradient(180deg,#ffffff, #fbfbfb);box-shadow:0 12px 32px rgba(0,0,0,0.04);padding:20px;position:relative}
+    .flower-svg{width:100%;height:auto;border-radius:10px;overflow:hidden}
+    .text-block{font-size:18px;color:var(--text);line-height:1.7;text-align:left;margin-top:6px}
+
+    /* Surprise card styles */
+    .surprise{padding:18px;border-radius:12px;background:linear-gradient(180deg,#fff,#fffbf9);border:1px solid rgba(0,0,0,0.03)}
+    .poem{font-style:italic;color:var(--teal);padding:18px;border-radius:10px}
+    .compliment{font-size:20px;font-weight:700;color:#2b5b64}
+
+    /* decorative confetti in teal/beige */
+    .confetti{position:absolute;left:12px;top:12px;width:80px;height:80px;opacity:0.95}
+    .heart-anim{width:44px;height:44px;display:inline-block;margin:6px;animation:pop 900ms ease-in-out infinite}
+    @keyframes pop{0%{transform:scale(1);opacity:0.9}50%{transform:scale(1.18);opacity:1}100%{transform:scale(1);opacity:0.9}}
+
+    /* gift card */
+    .gift-card{width:360px;height:160px;border-radius:12px;background:linear-gradient(180deg,#f9fffb,#f7fff7);border:1px solid rgba(19,132,150,0.06);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;box-shadow:0 10px 30px rgba(19,132,150,0.06)}
+    .gift-card .g-title{font-weight:800;color:var(--teal);font-size:18px}
+
+    /* envelope styles */
+    .envelope{width:640px;max-width:92%;height:380px;perspective:1100px;cursor:pointer}
+    .env-body{position:relative;width:100%;height:100%;border-radius:14px;background:linear-gradient(180deg,#fff,#fffaf6);box-shadow:0 26px 70px rgba(0,0,0,0.12);overflow:hidden;border:1px solid rgba(10,10,10,0.03)}
+    .env-flap{position:absolute;left:0;right:0;top:-2px;height:56%;background:linear-gradient(180deg,var(--beige),#fff0e6);transform-origin:50% 0;transition:transform 700ms cubic-bezier(.2,.9,.3,1);border-radius:14px 14px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:20px}
+    .env-seal{width:78px;height:46px;border-radius:10px;background:var(--teal);color:white;display:flex;align-items:center;justify-content:center;font-weight:800}
+    .env-inner{position:absolute;left:22px;right:22px;top:66px;bottom:18px;background:linear-gradient(180deg,#fffdf9,#fffaf3);border-radius:12px;padding:28px;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .42s ease,transform .42s ease;overflow:auto;border-left:6px solid rgba(19,132,150,0.06)}
+    .envelope.open .env-flap{transform:rotateX(-180deg)}
+    .envelope.open .env-inner{opacity:1;transform:translateY(0) scale(1)}
+
+    /* letter */
+    .letter-content{font-family:'Merriweather',serif;font-size:20px;line-height:1.9;color:var(--text)}
+    .letter-content .date{font-weight:700;color:var(--muted);text-align:right;margin-bottom:10px}
+    .letter-content p{margin:14px 0}
+    .signature{font-family:'Pacifico',cursive;color:var(--teal);font-size:30px;margin-top:14px}
+
+    /* progress badge */
+    .progress{position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.95);padding:8px 12px;border-radius:999px;font-weight:700;color:var(--muted);box-shadow:0 8px 20px rgba(0,0,0,0.04)}
+
+    @media (max-width:900px){
+      .envelope{width:92%;height:320px}
+      .letter-content{font-size:18px;line-height:1.8}
+      .gift-card{width:300px;height:140px}
+    }
+    @media (max-width:520px){
+      .card{height:94vh}
+      .letter-content{font-size:17px;line-height:1.7}
+      .progress{top:8px;right:10px;padding:6px 8px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="stage" id="stage" aria-live="polite" tabindex="0">
+        <!-- multiple surprise stages -->
+        <!-- s0: Intro bouquet -->
+        <div id="s0" class="stage-screen">
+          <div class="big-visual">
+            <svg class="flower-svg" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs><linearGradient id="bg1" x1="0" x2="1"><stop offset="0" stop-color="#fffaf8"/><stop offset="1" stop-color="#f7f2ec"/></linearGradient></defs>
+              <rect width="100%" height="100%" rx="12" fill="url(#bg1)"/>
+              <g transform="translate(60,40)">
+                <g transform="translate(260,110)">
+                  <ellipse rx="220" ry="120" fill="#fff7f2"/>
+                  <g transform="translate(40,0)">
+                    <circle cx="80" cy="40" r="90" fill="#ffdfe9"/>
+                    <circle cx="-20" cy="130" r="80" fill="#fff0e6"/>
+                    <circle cx="200" cy="140" r="70" fill="#e9fff9"/>
+                  </g>
+                </g>
+              </g>
+              <g transform="translate(680,30)">
+                <rect x="-30" y="120" width="140" height="220" rx="12" fill="#fff" stroke="#f0e1d3" />
+              </g>
+            </svg>
+          </div>
+          <div class="hint">Chạm vào đi :3</div>
+        </div>
+
+        <!-- s1: gentle words + small image -->
+        <div id="s1" class="stage-screen hidden">
+          <div class="progress">1 / 8</div>
+          <div class="big-visual">
+            <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+              <div style="flex:1;min-width:280px">
+                <div class="title">Những lời anh muốn gửi bé</div>
+                <div class="text-block">Em là lý do khiến anh chỉ mong chờ đến cuối ngày và cuối tuần. Cảm ơn em đã đến, ở bên và cho anh rất nhiều niềm vui nhỏ.</div>
+              </div>
+              <div style="width:260px;min-width:220px;background:linear-gradient(180deg,#fff,#f7f2ec);border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,0.03)">
+                <!-- small decorative teal/beige image -->
+                <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+                  <rect width="100%" height="100%" rx="10" fill="#fffefc"/>
+                  <g transform="translate(20,20)">
+                    <circle cx="48" cy="40" r="34" fill="#e9fff9" />
+                    <circle cx="120" cy="32" r="26" fill="#ffdfe9"/>
+                    <path d="M10 120 C50 80,120 80,200 120" stroke="#bfa289" stroke-width="6" fill="none" stroke-linecap="round"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="hint">Keep going bae</div>
+        </div>
+
+        <!-- s2: playful short poem -->
+        <div id="s2" class="stage-screen hidden">
+          <div class="progress">2 / 8</div>
+          <div class="big-visual surprise">
+            <div class="poem">"Cách anh yêu thì già cỗi,
+                               Cũng như cách mà anh vẫn hay nói,
+                               Là làm sao ôm hết yêu thương này nổi,
+                               Là cứ giữ mãi như thế này hay là thôi,
+                               Em như là cơn mưa kia ghé ngang,
+                               Mang theo suy tư kia xé tan,
+                               Anh mong là em chỉ một lần hiểu, 
+                               Là cả cuộc đời này ai cũng cần được yêu."<br><span style="display:block;margin-top:12px;font-size:14px;color:var(--muted)">— Bất ngờ nhỏ cho em</span></div>
+          </div>
+          <div class="hint">Chạm cái nữa nà</div>
+        </div>
+
+        <!-- s3: compliment cards (rotate on tap) -->
+        <div id="s3" class="stage-screen hidden">
+          <div class="progress">3 / 8</div>
+          <div class="big-visual">
+            <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:center">
+              <div class="surprise" style="min-width:220px">
+                <div class="compliment">Em thông minh và ấm áp</div>
+                <div style="color:var(--muted);margin-top:8px">Điều đó khiến anh khâm phục mỗi ngày.</div>
+              </div>
+              <div class="surprise" style="min-width:220px;background:linear-gradient(180deg,#f7fffb,#f7fbff)">
+                <div class="compliment" style="color:var(--teal)">Nụ cười em làm bừng sáng cả ngày</div>
+                <div style="color:var(--muted);margin-top:8px">Anh yêu dáng vẻ của em khi mà em nghiêm túc làm một việc gì đó thật sự rất cuốn hút.</div>
+              </div>
+            </div>
+          </div>
+          <div class="hint">Chạm tiếp iiii :33</div>
+        </div>
+
+        <!-- s4: memory moment -->
+        <div id="s4" class="stage-screen hidden">
+          <div class="progress">4 / 8</div>
+          <div class="big-visual">
+            <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+              <div style="flex:1;min-width:260px">
+                <div class="title" style="color:var(--teal)">Kỷ niệm nhỏ</div>
+                <div class="text-block">Anh nhớ lần đầu tiên nhìn vào mắt em — tim anh loạng choạng nhưng lại rất an lòng. Đó là khởi đầu của nhiều chuyến vui sau này.</div>
+              </div>
+              <div style="width:220px;height:140px;border-radius:12px;background:linear-gradient(180deg,#fff,#f6fbfc);display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,0.03)">
+                <!-- tiny badge -->
+                <svg viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+                  <rect width="100%" height="100%" rx="12" fill="#fffdfb"/>
+                  <g transform="translate(20,20)">
+                    <path d="M10 90 C40 40,120 40,200 90" stroke="#bfa289" stroke-width="6" fill="none"></path>
+                    <circle cx="60" cy="48" r="14" fill="#e9fff9"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="hint">Thêm lần nữa nhá</div>
+        </div>
+
+        <!-- s5: virtual hug + animated hearts -->
+        <div id="s5" class="stage-screen hidden">
+          <div class="progress">5 / 8</div>
+          <div class="big-visual">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+              <div style="font-weight:800;color:var(--teal);font-size:20px">Một cái ôm ảo từ anh</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+                <div class="heart-anim" title="♥">
+                  <svg viewBox="0 0 24 24" width="44" height="44" fill="#138496"><path d="M12 21s-7.5-4.35-9-6.44C0.78 11.64 2.46 6 7.5 6 10 6 12 8 12 8s2-2 4.5-2C21.54 6 23.22 11.64 21 14.56 19.5 16.65 12 21 12 21z"/></svg>
+                </div>
+                <div class="heart-anim" style="animation-delay:120ms">
+                  <svg viewBox="0 0 24 24" width="44" height="44" fill="#d6b89a"><path d="M12 21s-7.5-4.35-9-6.44C0.78 11.64 2.46 6 7.5 6 10 6 12 8 12 8s2-2 4.5-2C21.54 6 23.22 11.64 21 14.56 19.5 16.65 12 21 12 21z"/></svg>
+                </div>
+                <div class="heart-anim" style="animation-delay:240ms">
+                  <svg viewBox="0 0 24 24" width="44" height="44" fill="#138496"><path d="M12 21s-7.5-4.35-9-6.44C0.78 11.64 2.46 6 7.5 6 10 6 12 8 12 8s2-2 4.5-2C21.54 6 23.22 11.64 21 14.56 19.5 16.65 12 21 12 21z"/></svg>
+                </div>
+              </div>
+              <div style="color:var(--muted)">Cảm ơn em vì tất cả những gì em làm cho anh ngoài đời — anh chưa dám ôm thật thôi thì mạnh dạn ôm ảo nhé!</div>
+            </div>
+          </div>
+          <div class="hint">Touch me pls...</div>
+        </div>
+
+        <!-- s6: small surprise gift -->
+        <div id="s6" class="stage-screen hidden">
+          <div class="progress">6 / 8</div>
+          <div class="big-visual">
+            <div class="gift-card">
+              <div class="g-title">Món quà nhỏ</div>
+              <div style="margin-top:8px;color:var(--muted)">Một bữa tối ấm áp — anh sẽ nấu món em thích vào lần đi chơi tiếp theo nhá</div>
+            </div>
+          </div>
+          <div class="hint">Và cuối cùng nè</div>
+        </div>
+
+        <!-- s7: playful mini-quiz (yes/no) -->
+        <div id="s7" class="stage-screen hidden">
+          <div class="progress">7 / 8</div>
+          <div class="big-visual">
+            <div style="font-size:20px;font-weight:800;color:var(--teal);margin-bottom:10px">Câu hỏi vui</div>
+            <div style="font-size:18px;color:var(--muted);margin-bottom:12px">Em thích anh nấu món nào nhất?</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+              <button class="btn ter" onclick="alert('Anh nhớ rồi — lần tới sẽ nấu đặc biệt cho em 😄')">Món Việt</button>
+              <button class="btn ter" onclick="alert('Tuyệt — anh sẽ chuẩn bị món đó trong tuần này ❤️')">Món Ý</button>
+              <button class="btn ter" onclick="alert('Ngon! Anh sẽ sáng tạo món mới theo ý em 😋')">Món Mỹ</button>
+            </div>
+          </div>
+          <div class="hint">Thì là lần cuối cuối hehe</div>
+        </div>
+
+        <!-- s8: final envelope stage -->
+        <div id="s8" class="stage-screen hidden">
+          <div class="progress">8 / 8</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <div style="font-weight:800;color:var(--teal);font-size:20px">Thiệp cuối — mở phong thư</div>
+
+            <div class="envelope" id="envelope" aria-label="Phong thư, chạm để mở" tabindex="0">
+              <div class="env-body">
+                <div class="env-flap" id="envFlap"><div class="env-seal">20/10</div></div>
+                <div class="env-inner" id="envInner" aria-hidden="true">
+                  <div class="letter-content">
+                    <div class="date">20/10</div>
+                    <p class="para">Em ơi,</p>
+                    <p>Hôm nay anh muốn nhắc rằng em luôn là một phần ấm áp trong cuộc sống của anh. Em thông minh, dịu dàng và luôn biết cách khiến anh cười. Cảm ơn em vì mọi khoảnh khắc chúng ta có cùng nhau.</p>
+                    <p>Mong em có một ngày 20/10 ngọt ngào, nhận thật nhiều yêu thương và những điều nhỏ xinh. Anh ở đây, luôn bên cạnh để cùng em đi qua mọi mùa.</p>
+                    <p class="closing">Yêu em nhiều,</p>
+                    <div class="signature">huy deptrai</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="hint">Chạm vào phong thư để mở/đóng</div>
+        </div>
+
+      </div>
+
+      <div class="controls">
+        <div class="left-controls">
+          <button class="btn ter" id="backBtn">Quay lại</button>
+          <button class="btn ter" id="restartBtn">Bắt đầu lại</button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px">
+          <div id="qrcode" aria-hidden="false"></div>
+          <div style="text-align:right">
+            <div class="small">Quét để mở trang này</div>
+            <button class="btn" id="shareQR" style="background:var(--beige);color:var(--teal);font-weight:800">Chia sẻ QR</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QRCode library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script>
+    (function(){
+      const stageIds = ['s0','s1','s2','s3','s4','s5','s6','s7','s8'];
+      const stages = stageIds.map(id => document.getElementById(id));
+      let idx = 0;
+      const stageRoot = document.getElementById('stage');
+
+      function show(i){
+        idx = Math.max(0, Math.min(i, stages.length-1));
+        stages.forEach((el, j) => el.classList.toggle('hidden', j !== idx));
+        // when entering final envelope stage, reset envelope closed
+        if(stageIds[idx] === 's8') setEnvelope(false, true);
+      }
+
+      function next(){ if(idx < stages.length - 1) show(idx + 1); }
+      function prev(){ if(idx > 0) show(idx - 1); }
+      function restart(){ show(0); }
+
+      // tap/click to advance — ignore clicks on controls/buttons
+      stageRoot.addEventListener('click', function(e){
+        if(e.target.closest('.btn') || e.target.closest('button') || e.target.closest('.env-body')) return;
+        const current = stageIds[idx];
+        if(current === 's8'){
+          // if clicked inside envelope, toggle envelope instead of advance
+          if(e.target.closest('#envelope')){
+            toggleEnvelope();
+            return;
+          }
+        }
+        next();
+      });
+
+      // keyboard navigation
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){
+          if(document.activeElement && (document.activeElement.tagName === 'BUTTON' || document.activeElement.tagName === 'INPUT')) return;
+          const current = stageIds[idx];
+          if(current === 's8'){
+            const env = document.getElementById('envelope');
+            if(document.activeElement === env){ toggleEnvelope(); return; }
+          }
+          next();
+          e.preventDefault();
+        }
+        if(e.key === 'ArrowLeft') prev();
+        if(e.key === 'ArrowRight') next();
+      });
+
+      // envelope logic
+      const envelopeEl = document.getElementById('envelope');
+      const envInner = document.getElementById('envInner');
+      const envFlap = document.getElementById('envFlap');
+      let open = false;
+      function setEnvelope(state, silent){
+        open = !!state;
+        if(open){
+          envelopeEl.classList.add('open');
+          envInner.setAttribute('aria-hidden','false');
+        } else {
+          envelopeEl.classList.remove('open');
+          envInner.setAttribute('aria-hidden','true');
+        }
+        if(silent){
+          envFlap.style.transition = 'none';
+          envInner.style.transition = 'none';
+          requestAnimationFrame(()=>{ envFlap.style.transition=''; envInner.style.transition=''; });
+        }
+      }
+      function toggleEnvelope(){ setEnvelope(!open, false); }
+
+      envelopeEl.addEventListener('click', function(e){
+        e.stopPropagation();
+        toggleEnvelope();
+      });
+
+      // controls
+      document.getElementById('backBtn').addEventListener('click', function(e){ e.stopPropagation(); prev(); });
+      document.getElementById('restartBtn').addEventListener('click', function(e){ e.stopPropagation(); restart(); });
+
+      // initialize
+      show(0);
+
+      // QR generator
+      const qrcodeContainer = document.getElementById('qrcode');
+      function generateQR(url){
+        qrcodeContainer.innerHTML = '';
+        new QRCode(qrcodeContainer, { text: url, width: 96, height: 96, colorDark: "#0f3b3d", colorLight:"#fff", correctLevel: QRCode.CorrectLevel.H });
+      }
+      const pageUrl = (location.protocol==='http:'||location.protocol==='https:')? location.href : 'https://your-hosted-page.example/bouquet-card.html';
+      generateQR(pageUrl);
+
+      document.getElementById('shareQR').addEventListener('click', function(e){
+        e.stopPropagation();
+        const urlToShare = (location.protocol==='http:'||location.protocol==='https:')? location.href : prompt('Dán URL nơi bạn sẽ lưu file này (nhập để tạo QR):','https://your-hosted-page.example/bouquet-card.html');
+        if(urlToShare) generateQR(urlToShare);
+      });
+
+      // small safety: prevent accidental selection during long presses
+      document.addEventListener('touchstart', function(){}, {passive:true});
+
+      // Keep signature fixed as "huy" per your request (embedded)
+    })();
+  </script>
+</body>
+</html># huy-card
